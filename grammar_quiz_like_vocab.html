@@ -1,0 +1,113 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Grammar Quiz</title>
+  <style>
+    body {{ font-family: sans-serif; background: #f2f2f2; padding: 15px; }}
+    h1 {{ background: #007acc; color: white; padding: 12px; border-radius: 5px; text-align: center; }}
+    .card {{ background: white; padding: 15px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); margin-top: 20px; }}
+    button {{ background: #007acc; color: white; padding: 10px; border: none; width: 100%; border-radius: 5px; font-size: 16px; }}
+    #progress {{ background: #ccc; height: 20px; border-radius: 5px; overflow: hidden; margin-top: 15px; }}
+    #bar {{ background: #007acc; height: 100%; width: 0%; text-align: center; color: white; }}
+  </style>
+</head>
+<body>
+<h1>Grammar Quiz: Conditionals & Future</h1>
+<div id="quiz" class="card"></div>
+<div id="progress"><div id="bar">0%</div></div>
+<button onclick="nextQuestion()">Nächste Frage</button>
+<div id="feedback"></div>
+
+<script>
+const questions = [
+  {question: "If it rains tomorrow, we ___ at home.", options: ["will stay", "would stay", "had stayed", "stayed"], answer: "will stay", explanation: "Typ I: If + Present → will + Verb"},
+  {question: "If she had studied, she ___ the test.", options: ["would have passed", "passed", "would pass", "passes"], answer: "would have passed", explanation: "Typ III: Vergangenheit"},
+  {question: "Look at those clouds! It ___ rain.", options: ["is going to", "will", "does", "might"], answer: "is going to", explanation: "going to bei Anzeichen"},
+  {question: "He ___ 18 next week.", options: ["will be", "is being", "is", "goes"], answer: "will be", explanation: "will für Fakten"},
+  {question: "If you ___ me, I’d help you.", options: ["asked", "ask", "will ask", "had asked"], answer: "asked", explanation: "Typ II: hypothetisch"}
+];
+
+let score = 0;
+let current = 0;
+
+function shuffleArray(arr) {{
+  for (let i = arr.length - 1; i > 0; i--) {{
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }}
+}}
+shuffleArray(questions);
+
+function updateProgress() {{
+  let percent = Math.round((current / questions.length) * 100);
+  const bar = document.getElementById('bar');
+  bar.style.width = percent + "%";
+  bar.textContent = percent + "%";
+}}
+
+function showQuestion() {{
+  const q = questions[current];
+  let html = `<strong>${{q.question}}</strong><br>`;
+  q.options.forEach(opt => {{
+    html += `<label><input type='radio' name='opt' value="${{opt}}"> ${{opt}}</label><br>`;
+  }});
+  document.getElementById("quiz").innerHTML = html;
+  updateProgress();
+}}
+
+function nextQuestion() {{
+  const opts = document.getElementsByName("opt");
+  let chosen = null;
+  for (let opt of opts) {{
+    if (opt.checked) {{
+      chosen = opt.value;
+    }}
+  }}
+  if (!chosen) {{
+    document.getElementById("feedback").textContent = "Bitte wähle eine Antwort aus.";
+    return;
+  }}
+  const correct = questions[current].answer;
+  let msg = "";
+  if (chosen === correct) {{
+    score++;
+    msg = "Richtig!";
+  }} else {{
+    msg = `Falsch. Richtige Antwort: ${{correct}} — ${{questions[current].explanation}}`;
+  }}
+  document.getElementById("feedback").textContent = msg;
+  current++;
+  if (current < questions.length) {{
+    setTimeout(() => {{
+      document.getElementById("feedback").textContent = "";
+      showQuestion();
+    }}, 1500);
+  }} else {{
+    setTimeout(showResult, 1500);
+  }}
+}}
+
+function showResult() {{
+  const pct = Math.round((score / questions.length) * 100);
+  let msg = "";
+  if (pct >= 91) msg = "Heiko ist voller Stolz";
+  else if (pct >= 81) msg = "Schon garnicht mal so schlecht";
+  else if (pct >= 61) msg = "da ist noch Luft nach oben";
+  else if (pct >= 41) msg = "Ay Ay Ay";
+  else if (pct >= 21) msg = "Heiko wird ausrasten";
+  else msg = "Verpiss dich in die MP1";
+
+  document.getElementById("quiz").innerHTML = `<h2>Ergebnis</h2>
+      <p>Du hast ${{score}} von ${{questions.length}} richtig.</p>
+      <p><strong>${{pct}}%</strong></p>
+      <p>${{msg}}</p>`;
+  document.getElementById("feedback").textContent = "";
+}}
+
+showQuestion();
+</script>
+</body>
+</html>
